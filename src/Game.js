@@ -1,5 +1,17 @@
 // src/Game.js
+
 import { Bird } from './Bird.js';
+
+
+// Game States
+const gameStates = {
+    ready: 0,
+    start: 1,
+    game_over: 2
+};
+
+let currentState = gameState.ready;
+let score = 0;
 
 // --- INITIALIZATION ---
 
@@ -21,6 +33,25 @@ const bird = new Bird(
     'assets/images/flappy-bird.png' // imagePath
 );
 
+// State Change handling
+
+window.addeventlistener('keydown',(e)=>{
+    if(e.code === 'Space'){
+        // if ready --> play
+        // if play --> play(no change)
+        if(currentState === gameState.ready){
+            currentState = gameState.playing;
+        }
+        // if game over --> restart game
+        else if(currentState === gameState.game_over){
+             bird.y = canvas.height/2;
+             bird.velocity = 2;
+             score = 0;
+             currenState = gameState.ready;
+        }
+    }
+});
+
 // --- WINDOW AND RESIZE HANDLERS ---
 
 function resize() {
@@ -41,13 +72,49 @@ backgroundImage.onload = function () {
 }
 window.addEventListener('resize', resize);
 
+// functions for different screens
+function drawCenteredText(text, size) {
+    ctx.fillStyle = "white";
+    ctx.font = `${size}px Arial`;
+    ctx.textAlign = "center";
+    ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+}
 
+function drawStartScreen(){
+    drawCeneterdText("Press SPACE to begin the game",50);
+};
+
+function drawGameOverScreen(){
+    drawCeneteredText("GAME OVER",60);
+    ctx.fillText(`Score: ${score}`, canvas.width / 2, canvas.height / 2 + 60);
+    ctx.fillText("Press SPACE to restart the game", canvas.width / 2, canvas.height / 2 + 120);
+}
 // --- GAME LOOP ---
 
 function gameloop() {
     // 1. CLEAR AND DRAW BACKGROUND
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+
+    switch(currentState){
+        case gameState.ready:
+            // bird visible but stationary
+            bird.draw(ctx);
+            drawStartScreen();
+            break;
+            
+        case gameState.playing:
+            // currently playing
+            bird.update();
+            bird.draw(ctx);
+            // pipes score etc
+            break;
+
+        case gameState.game_over:
+            bird.draw(ctx);
+            drawGameOverScreen();
+            break;       
+    }
     
     // 2. UPDATE GAME OBJECTS (Physics/Movement)
     bird.update(); // Update the bird's position
