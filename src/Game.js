@@ -4,7 +4,7 @@ import { Bird } from './Bird.js';
 
 
 // Game States
-const gameStates = {
+const gameState = {
     ready: 0,
     start: 1,
     game_over: 2
@@ -35,19 +35,19 @@ const bird = new Bird(
 
 // State Change handling
 
-window.addeventlistener('keydown',(e)=>{
+window.addEventListener('keydown',(e)=>{
     if(e.code === 'Space'){
         // if ready --> play
         // if play --> play(no change)
         if(currentState === gameState.ready){
-            currentState = gameState.playing;
+            currentState = gameState.start;
         }
         // if game over --> restart game
         else if(currentState === gameState.game_over){
              bird.y = canvas.height/2;
              bird.velocity = 2;
              score = 0;
-             currenState = gameState.ready;
+             currentState = gameState.ready;
         }
     }
 });
@@ -81,7 +81,7 @@ function drawCenteredText(text, size) {
 }
 
 function drawStartScreen(){
-    drawCeneterdText("Press SPACE to begin the game",50);
+    drawCeneteredText("Press SPACE to begin the game",50);
 };
 
 function drawGameOverScreen(){
@@ -103,7 +103,7 @@ function gameloop() {
             drawStartScreen();
             break;
             
-        case gameState.playing:
+        case gameState.start:
             // currently playing
             bird.update();
             bird.draw(ctx);
@@ -115,12 +115,14 @@ function gameloop() {
             drawGameOverScreen();
             break;       
     }
-    
+
+    /*
     // 2. UPDATE GAME OBJECTS (Physics/Movement)
     bird.update(); // Update the bird's position
 
     // 3. DRAW GAME OBJECTS
     bird.draw(ctx); // Draw the bird using the context
+    */
     
     // 4. LOOP
     requestAnimationFrame(gameloop);
