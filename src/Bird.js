@@ -11,6 +11,7 @@ export class Bird {
         this.height = height;
         this.velocity = 2; // Initial fall velocity
         this.space = false; // Tracks spacebar state
+        this.rotation = 0 // Setting current rotation
 
         this.getCurrentState = getCurrentState; // Function to get current state
         this.gameState = gameState;
@@ -35,8 +36,7 @@ export class Bird {
         // Rotation
         ctx.save();
         ctx.translate(this.x,this.y);
-        let angle = this.velocity*0.05;
-        ctx.rotate(angle);
+        ctx.rotate(this.rotation);
         
         // Draw the image, centered on bird.x, bird.y
         ctx.drawImage(
@@ -74,7 +74,18 @@ export class Bird {
         
         // Simple gravity: if not the max terminal velocity (2), accelerate towards it
         if (this.velocity < 10) { // Setting a max terminal velocity of 10 for realism
-             this.velocity = this.velocity + 2;
+             this.velocity += 2;
         }
+        
+        // Smooth rotation: flap up tilts -25 degrees, falling tilts +90 degrees
+        const maxUpAngle = -25 * Math.PI / 180;  // Convert to radians
+        const maxDownAngle = Math.min(90 * Math.PI / 180, this.rotation); // Convert to radians
+
+        // Target angle based on velocity
+        let targetAngle = this.velocity < 0 ? maxUpAngle : maxDownAngle;
+
+       // Smoothly move rotation toward target angle
+       const rotationSpeed = 0.1; // smaller = slower, larger = snappier
+       this.rotation += (targetAngle - this.rotation) * rotationSpeed;
     }
 }
