@@ -30,9 +30,9 @@ const bird = new Bird(
     '#FF0000', // color
     40, // width
     30, // height
-    'assets/images/flappy-bird.png' // imagePath
     () => currentState, // function to dynamically get current state
     gameState
+    'assets/images/flappy-bird.png' // imagePath
 );
 
 // State Change handling
