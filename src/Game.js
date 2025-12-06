@@ -1,6 +1,7 @@
 // src/Game.js
 
 import { Bird } from './Bird.js';
+import { updatePipes, getScore, pipeWidth, pipeGap } from './Pipes.js';
 
 
 // Game States
@@ -11,7 +12,6 @@ const gameState = {
 };
 
 let currentState = gameState.ready;
-let score = 0;
 
 // --- INITIALIZATION ---
 
@@ -95,10 +95,11 @@ function drawGameOverScreen(){
 
 
 function drawScore(){
+    const currentScore = getScore();
     ctx.fillStyle = "white";
     ctx.font = "60px Arial";
     ctx.textAlign = "center";
-    ctx.fillText(score, canvas.width / 2, 100);
+    ctx.fillText(currentScore, canvas.width / 2, 100);
 }
 // --- GAME LOOP ---
 
@@ -117,6 +118,8 @@ function gameloop() {
         case gameState.start:
             // currently playing
             bird.update();
+
+            updatePipes(ctx, canvas.width, canvas.height);
             bird.draw(ctx);
             drawScore();
             // pipes score etc

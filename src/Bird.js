@@ -67,25 +67,31 @@ export class Bird {
     // Updates position based on velocity and gravity
     update() {
         if (this.space) {
-            this.velocity = -10; // Flap up
+            this.velocity = -5; // Flap up
         }
         
         this.y = this.y + this.velocity;
         
         // Simple gravity: if not the max terminal velocity (2), accelerate towards it
-        if (this.velocity < 10) { // Setting a max terminal velocity of 10 for realism
-             this.velocity += 2;
+        if (this.velocity < 5) { // Setting a max terminal velocity of 10 for realism
+             this.velocity += 0.25;
         }
         
         // Smooth rotation: flap up tilts -25 degrees, falling tilts +90 degrees
-        const maxUpAngle = -25 * Math.PI / 180;  // Convert to radians
-        const maxDownAngle = Math.min(90 * Math.PI / 180, this.rotation); // Convert to radians
+        const maxUpAngle = -25 * Math.PI / 180;
+        const maxDownAngle = 90 * Math.PI / 180;
 
-        // Target angle based on velocity
-        let targetAngle = this.velocity < 0 ? maxUpAngle : maxDownAngle;
+        // Map velocity to angle
+        // velocity: -10 → angle ≈ -25°
+        // velocity: 0   → angle = 0°
+        // velocity: 10  → angle ≈ 90°
+        let targetAngle = (this.velocity / 10) * maxDownAngle;
 
-       // Smoothly move rotation toward target angle
-       const rotationSpeed = 0.1; // smaller = slower, larger = snappier
-       this.rotation += (targetAngle - this.rotation) * rotationSpeed;
+        // Clamp angle between -25° and 90°
+        targetAngle = Math.max(maxUpAngle, Math.min(maxDownAngle, targetAngle));
+
+        // Smooth rotation
+        const rotationSpeed = 0.1;
+        this.rotation += (targetAngle - this.rotation) * rotationSpeed;
     }
 }
