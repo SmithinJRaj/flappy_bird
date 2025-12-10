@@ -9,7 +9,7 @@ export class Bird {
         this.color = color;
         this.width = width;
         this.height = height;
-        this.velocity = 2; // Initial fall velocity
+        this.velocity = 0; // Initial fall velocity
         this.space = false; // Tracks spacebar state
         this.rotation = 0 // Setting current rotation
 
@@ -67,14 +67,14 @@ export class Bird {
     // Updates position based on velocity and gravity
     update() {
         if (this.space) {
-            this.velocity = -5; // Flap up
+            this.velocity = -2.3; // Flap up
         }
         
         this.y = this.y + this.velocity;
         
         // Simple gravity: if not the max terminal velocity (2), accelerate towards it
-        if (this.velocity < 5) { // Setting a max terminal velocity of 10 for realism
-             this.velocity += 0.25;
+        if (this.velocity < 6) { // Setting a max terminal velocity of 10 for realism
+             this.velocity += 0.125;
         }
         
         // Smooth rotation: flap up tilts -25 degrees, falling tilts +90 degrees

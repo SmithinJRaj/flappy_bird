@@ -1,7 +1,8 @@
 // src/Game.js
 
 import { Bird } from './Bird.js';
-import { updatePipes, getScore, pipeWidth, pipeGap } from './Pipes.js';
+import { updatePipes, getScore, pipeWidth, pipeGap, getPipes } from './Pipes.js';
+import { isColliding } from './utils.js';
 
 
 // Game States
@@ -57,6 +58,20 @@ window.addEventListener('keydown',(e)=>{
 
 // --- WINDOW AND RESIZE HANDLERS ---
 
+// --- WINDOW AND INITIAL DRAWING HANDLERS ---
+// The dimensions are now fixed by the HTML canvas attributes!
+
+function initialDraw() {
+    // We no longer read innerWidth/innerHeight, we use the fixed dimensions
+    const width = canvas.width;  // 288
+    const height = canvas.height; // 512
+
+    // Redraw the background immediately after resize
+    ctx.drawImage(backgroundImage, 0, 0, width, height);
+    
+    // NOTE: We don't need to update bird.y here unless we want to reset it explicitly
+}
+
 function resize() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -70,10 +85,9 @@ function resize() {
 
 // Initial setup and handling resize
 backgroundImage.onload = function () {
-    resize();
+    initialDraw();
     gameloop(); // Start the loop only once the background is loaded
 }
-window.addEventListener('resize', resize);
 
 // functions for different screens
 function drawCenteredText(text, size) {
@@ -88,8 +102,13 @@ function drawStartScreen(){
 }
 
 function drawGameOverScreen(){
+    const finalScore = getScore(); // <-- Get the score from the Pipes module
+    
     drawCenteredText("GAME OVER",60);
-    ctx.fillText(`Score: ${score}`, canvas.width / 2, canvas.height / 2 + 60);
+    
+    // FIX REQUIRED: Change 'score' to 'finalScore'
+    ctx.fillText(`Score: ${finalScore}`, canvas.width / 2, canvas.height / 2 + 60); 
+    
     ctx.fillText("Press SPACE to restart the game", canvas.width / 2, canvas.height / 2 + 120);
 }
 
@@ -119,7 +138,12 @@ function gameloop() {
             // currently playing
             bird.update();
 
-            updatePipes(ctx, canvas.width, canvas.height);
+            updatePipes(ctx, canvas.width, canvas.height, bird);
+
+            if (isColliding(bird, getPipes(), canvas.height)) {
+                currentState = gameState.game_over;
+            }
+
             bird.draw(ctx);
             drawScore();
             // pipes score etc
