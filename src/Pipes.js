@@ -17,7 +17,11 @@ pipeBottomImage.src = 'assets/images/pipe-bottom.png'; // Make sure this path is
 // 2. Game Variables
 let pipes = [];     
 let frameCount = 0; 
-let score = 0;      
+let score = 0;   
+
+export function resetScore() {
+    score = 0;
+}
 
 // 3. Export Accessor Functions (No change)
 export function getPipes() {
