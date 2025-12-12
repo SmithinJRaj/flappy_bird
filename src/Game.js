@@ -91,7 +91,7 @@ function drawCenteredText(text, size,offsetY = 0) {
 
 // "Press SPACE to start" screen
 function drawStartScreen(){
-    drawCenteredText("Press SPACE to begin the game", 32);
+    drawCenteredText("Press SPACE to begin the game", 18);
 }
 
 // Game Over screen
