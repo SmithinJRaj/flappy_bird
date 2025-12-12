@@ -1,11 +1,11 @@
 // src/Game.js
 
+// ---------------- IMPORTS ----------------
 import { Bird } from './Bird.js';
 import { updatePipes, getScore, pipeWidth, pipeGap, getPipes } from './Pipes.js';
 import { isColliding } from './utils.js';
 
-
-// Game States
+// ---------------- GAME STATES ----------------
 const gameState = {
     ready: 0,
     start: 1,
@@ -14,11 +14,11 @@ const gameState = {
 
 let currentState = gameState.ready;
 
-// --- INITIALIZATION ---
+// ---------------- INITIALIZATION ----------------
+const canvas = document.getElementById('canvas'); // getting canva element
+const ctx = canvas.getContext('2d'); // 2D drawing context
 
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-
+// setting background image
 const backgroundImage = new Image();
 // NOTE: Paths are relative to index.html when served by the browser
 backgroundImage.src = 'assets/images/flappy-bg.jpg';
@@ -32,19 +32,18 @@ const bird = new Bird(
     40, // width
     30, // height
     () => currentState, // function to dynamically get current state
-    gameState,
+    gameState, // game state
     'assets/images/flappy-bird.png' // imagePath
 );
 
-// State Change handling
-
+// ---------------- INPUT HANDLING ----------------
 window.addEventListener('keydown',(e)=>{
     if(e.code === 'Space'){
         // if ready --> play
-        // if play --> play(no change)
         if(currentState === gameState.ready){
             currentState = gameState.start;
         }
+        // if play --> play(no change)
         // if game over --> restart game
         else if(currentState === gameState.game_over){
              bird.y = canvas.height/2;
@@ -56,11 +55,8 @@ window.addEventListener('keydown',(e)=>{
     }
 });
 
-// --- WINDOW AND RESIZE HANDLERS ---
-
 // --- WINDOW AND INITIAL DRAWING HANDLERS ---
-// The dimensions are now fixed by the HTML canvas attributes!
-
+// The dimensions are now fixed by the HTML canvas attributes
 function initialDraw() {
     // We no longer read innerWidth/innerHeight, we use the fixed dimensions
     const width = canvas.width;  // 288
@@ -68,19 +64,7 @@ function initialDraw() {
 
     // Redraw the background immediately after resize
     ctx.drawImage(backgroundImage, 0, 0, width, height);
-    
     // NOTE: We don't need to update bird.y here unless we want to reset it explicitly
-}
-
-function resize() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    // Redraw the background immediately after resize
-    ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
-    // Update bird's starting Y if canvas height changed drastically
-    if (bird) { 
-        bird.y = canvas.height / 2;
-    }
 }
 
 // Initial setup and handling resize
@@ -90,38 +74,48 @@ backgroundImage.onload = function () {
 }
 
 // functions for different screens
-function drawCenteredText(text, size) {
-    ctx.fillStyle = "white";
-    ctx.font = `${size}px Arial`;
+function drawCenteredText(text, size,offsetY = 0) {
+     ctx.font = `${size}px Arial`;
     ctx.textAlign = "center";
-    ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+    ctx.textBaseline = "middle";
+
+    // Outline (makes text readable on any background)
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = 4;
+    ctx.strokeText(text, canvas.width / 2, canvas.height / 2 + offsetY);
+
+    // White fill
+    ctx.fillStyle = "white";
+    ctx.fillText(text, canvas.width / 2, canvas.height / 2 + offsetY);
 }
 
+// "Press SPACE to start" screen
 function drawStartScreen(){
-    drawCenteredText("Press SPACE to begin the game",50);
+    drawCenteredText("Press SPACE", 28, -10);
+    drawCenteredText("to begin", 28, 25);
 }
 
+// Game Over screen
 function drawGameOverScreen(){
     const finalScore = getScore(); // <-- Get the score from the Pipes module
     
-    drawCenteredText("GAME OVER",60);
+    drawCenteredText("GAME OVER",42,-40);
     
-    // FIX REQUIRED: Change 'score' to 'finalScore'
-    ctx.fillText(`Score: ${finalScore}`, canvas.width / 2, canvas.height / 2 + 60); 
-    
-    ctx.fillText("Press SPACE to restart the game", canvas.width / 2, canvas.height / 2 + 120);
+    drawCenteredText(`Score: ${finalScore}`, 32, 10);
+    drawCenteredText("Press SPACE to restart", 28, 60);
 }
 
-
+// Show score while playing
 function drawScore(){
     const currentScore = getScore();
     ctx.fillStyle = "white";
-    ctx.font = "60px Arial";
-    ctx.textAlign = "center";
-    ctx.fillText(currentScore, canvas.width / 2, 100);
+    ctx.font = "30px Arial";
+    ctx.textAlign = "left"; // align from left
+    ctx.textBaseline = "top"; // align from top
+    ctx.fillText(`Score: ${currentScore}`, 10, 10);
 }
-// --- GAME LOOP ---
 
+// ---------------- GAME LOOP ---------------
 function gameloop() {
     // 1. CLEAR AND DRAW BACKGROUND
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -138,32 +132,25 @@ function gameloop() {
             // currently playing
             bird.update();
 
+            // Update pipes and draw them
             updatePipes(ctx, canvas.width, canvas.height, bird);
 
+            // Check collision between bird and pipes/ground
             if (isColliding(bird, getPipes(), canvas.height)) {
                 currentState = gameState.game_over;
             }
 
             bird.draw(ctx);
             drawScore();
-            // pipes score etc
             break;
 
         case gameState.game_over:
+            // Bird stays where it crashed
             bird.draw(ctx);
-            drawGameOverScreen();
+            drawGameOverScreen(); // Show GAME OVER UI
             break;       
     }
-
-    /*
-    // 2. UPDATE GAME OBJECTS (Physics/Movement)
-    bird.update(); // Update the bird's position
-
-    // 3. DRAW GAME OBJECTS
-    bird.draw(ctx); // Draw the bird using the context
-    */
-    
-    // 4. LOOP
+    // Request next animation frame → loop never ends
     requestAnimationFrame(gameloop);
 }
 
