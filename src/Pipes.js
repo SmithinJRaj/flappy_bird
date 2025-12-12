@@ -32,6 +32,11 @@ export function getScore() {
     return score;
 }
 
+export function resetPipes() {
+    pipes = [];
+    frameCount = 0;
+}
+
 export function drawPipe(ctx, pipe, canvasHeight) {
     const topPipeEnd = pipe.center - pipeGap / 2;
     const bottomPipeStart = pipe.center + pipeGap / 2;

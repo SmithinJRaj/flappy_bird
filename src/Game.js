@@ -2,7 +2,7 @@
 
 // ---------------- IMPORTS ----------------
 import { Bird } from './Bird.js';
-import { updatePipes, getScore, pipeWidth, pipeGap, getPipes, resetScore } from './Pipes.js';
+import { updatePipes, getScore, pipeWidth, pipeGap, getPipes, resetScore, resetPipes } from './Pipes.js';
 import { isColliding } from './utils.js';
 
 // ---------------- GAME STATES ----------------
@@ -50,6 +50,7 @@ window.addEventListener('keydown',(e)=>{
              bird.velocity = 2;
              resetScore(); 
             bird.rotation = 0;
+            resetPipes();
             currentState = gameState.ready;
         }
     }
