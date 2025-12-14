@@ -21,7 +21,7 @@ export class Bird {
         // NOTE: Paths are relative to index.html when served by the browser
         this.image.src = imagePath; 
 
-        this.flap(); // Set up the event listeners
+        this.setupInputListeners(); // Set up the event listeners
     }
 
     // Existing function logic is now a class method
@@ -49,6 +49,26 @@ export class Bird {
         ctx.restore();
     }
 
+    // --- NEW: Public method to trigger the immediate flap action ---
+    triggerFlapAction() {
+        // Only allow flapping when the game is actively playing
+        if (this.getCurrentState() === this.gameState.start) {
+            this.velocity = -3.8; // Strong, immediate jump velocity
+        }
+    }
+
+    // Setup input listeners (only keydown is needed now)
+    setupInputListeners() {
+        window.addEventListener('keydown', (event) => {
+            if (event.code === 'Space' && this.getCurrentState() !== this.gameState.game_over) {
+                // When SPACE is pressed, call the action method
+                this.triggerFlapAction();
+            }
+        });
+        
+        // Keyup listener and this.space variable are no longer needed.
+    }
+
     // Handles the flap action (setting initial negative velocity)
     flap() {
         window.addEventListener('keydown', (event) => {
@@ -66,10 +86,6 @@ export class Bird {
 
     // Updates position based on velocity and gravity
     update() {
-        if (this.space) {
-            this.velocity = -2.3; // Flap up
-        }
-        
         this.y = this.y + this.velocity;
         
         // Simple gravity: if not the max terminal velocity (2), accelerate towards it
