@@ -14,6 +14,11 @@ const gameState = {
 
 let currentState = gameState.ready;
 
+// Load High Score from browser storage, default to 0 if none is found
+let highScore = localStorage.getItem('flappyHighScore') || 0; // <-- ADD THIS LINE
+// Ensure it's treated as a number
+highScore = Number(highScore);
+
 // ---------------- INITIALIZATION ----------------
 const canvas = document.getElementById('canvas'); // getting canva element
 const ctx = canvas.getContext('2d'); // 2D drawing context
@@ -91,19 +96,68 @@ function drawCenteredText(text, size,offsetY = 0) {
 }
 
 // "Press SPACE to start" screen
-function drawStartScreen(){
-    drawCenteredText("Press SPACE", 28, -10);
-    drawCenteredText("to begin", 28, 25);
+function drawStartScreen(bird){ 
+    // 1. Title
+    drawCenteredText("FLAPPY BIRD", 50, -120); // Move title up
+
+    // 2. High Score Status
+    ctx.font = "30px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    // Text Outline for High Score
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = 4;
+    ctx.strokeText("HIGH SCORE: " + highScore, canvas.width / 2, 180);
+
+    // Text Fill for High Score (use a different color for pop)
+    ctx.fillStyle = "#FFDD00"; 
+    ctx.fillText("HIGH SCORE: " + highScore, canvas.width / 2, 180); 
+    
+    // 3. Tutorial Bird & Animation (Bounce)
+    const bounceAmplitude = 5;
+    const bounceSpeed = 0.005; // Time-based speed
+    const bounceOffset = Math.sin(Date.now() * bounceSpeed) * bounceAmplitude;
+
+    // Define the central ready position
+    const readyY = canvas.height / 2 - 20 + bounceOffset; 
+    
+    // Temporarily set the bird's position for drawing
+    bird.y = readyY; 
+    bird.draw(ctx); 
+
+    // 4. Instructions/Prompt (Tap to Flap)
+    drawCenteredText("TAP TO FLAP", 28, readyY - canvas.height / 2 + 60); // Centered relative to bird
+    
+    // 5. Start Prompt
+    drawCenteredText("Press SPACE to begin", 28, canvas.height / 2 - 50); // Moved to the bottom
 }
 
 // Game Over screen
 function drawGameOverScreen(){
-    const finalScore = getScore(); // <-- Get the score from the Pipes module
+    const finalScore = getScore(); 
     
+    // 1. Check and Save High Score
+    let isNewHighScore = false;
+    if (finalScore > highScore) {
+        highScore = finalScore;
+        localStorage.setItem('flappyHighScore', highScore);
+        isNewHighScore = true;
+    }
+    
+    // 2. Display UI
     drawCenteredText("GAME OVER",42,-40);
     
-    drawCenteredText(`Score: ${finalScore}`, 32, 10);
-    drawCenteredText("Press SPACE to restart", 28, 60);
+    // Highlight if it's a new record
+    if(isNewHighScore) {
+        drawCenteredText(`NEW HIGH SCORE!`, 32, 10);
+    } else {
+        drawCenteredText(`Score: ${finalScore}`, 32, 10);
+    }
+
+    // Display the best score below
+    drawCenteredText(`Best: ${highScore}`, 28, 60);
+    drawCenteredText("Press SPACE to restart", 24, 110);
 }
 
 // Show score while playing
@@ -126,7 +180,7 @@ function gameloop() {
         case gameState.ready:
             // bird visible but stationary
             bird.draw(ctx);
-            drawStartScreen();
+            drawStartScreen(bird);
             break;
             
         case gameState.start:
